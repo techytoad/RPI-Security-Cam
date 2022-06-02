@@ -2,17 +2,19 @@
 # Raspberry-pi Security Cam
 
 # Overview
-Using a raspberry pi, we 2 USB webcams to both record and display a live image of the feed on a local http server. This program is run on a raspberry pi which can be placed in a convienient location for the user. For me, this was to monitor the inside and outside of a chicken coop, but it can be modified for whatever you want. 
+Using a raspberry pi and 2 USB webcams, this project aims to both record, and display a live image of the feed on a local http server. This program is run on a raspberry pi (or other computer) which can be placed in a convienient location for the user. For me, this was to monitor the inside and outside of a chicken coop, but it can be modified for whatever you want. 
 
-# Hardware used
+# Hardware
 - Raspberry PI 2B
 - Logitech QuickCam Orbit MP USB Webcam (Camera 1)
 - Unbranded automatic IR USB webcam (Camera 2)
-- Arduino/Raspberry LDR module (use connection D0)
-- USB Wifi Dongle (if WIFI is not built-in)
+- Arduino/Raspberry LDR module (need at least pins VCC, GND, D0)
+- USB Wifi Dongle (if WIFI is not already built-in)
 
 # Methodology
-Utilizing pygame camera module, this program connects to 2 USB webcams that are plugged into the raspberry pi. 1 thread is launched per camera, and only 1 camera is read at a time using threadlocks. The reason for the LDR module above is because camera 1 is located outside, so we dont want to record when it is dark out. Camera 2 is inside with an IR sensor, so it will record regardless. Edit the code if you want the configuration differently. Each photo taken is stored in RAM, and then after a set amount of time *time_cycle*. In another thread, it is checking if it is time to write the video. Using opencv videowriter, the video is written to disk in a daily folder. If the folder count is more than days_recorded, delete the old ones to free up space. In yet another thread, a http server launched. This is a simple function using python TCP threads for the lowest latency. There are 3 buttons on this simple website, "refresh", "toggle hd", and "toggle camera". All are pretty self-explanatory. Below these, the image is displayed.  
+Utilizing pygame camera module, this program connects to 2 USB webcams that are plugged into the raspberry pi. 1 thread is launched per camera, and only 1 camera is read at a time using threadlocks. I found that if this is not done then sometimes the USB webcams disconnect. For my configuration, the reason for the LDR module above is because camera 1 is located outside, so we dont want to record when it is dark out. Camera 2 is inside with an IR sensor, so it will record regardless. Edit the code if you want the configuration differently. Each photo taken is stored in RAM, and then after a set amount of time **time_cycle** the video(s) are written. In another thread (write_video), using opencv videowriter, the video is written to disk in a day-separated folder. If the folder count is more than days_recorded, delete the old ones to free up space. In yet another thread, a http server is running. This is just a simple part using python TCP threads for the lowest latency rather than using something like django or flask. I did try using flask, but with the 2B's limited memory and CPU it was not running properly. There are 3 buttons on this simple website, "refresh", "toggle hd", and "toggle camera". All are pretty self-explanatory. Below these, the a screenshot is displayed.  
+
+<img src="./res/screenshot.jpg" width="600" height="600"/>
 
 # Installation
 
@@ -22,6 +24,9 @@ This program will require a RPI or similar host computer. This project requires 
 - [pygame](https://www.pygame.org/news)
 
 # Wiring
+See the image below to see how this was wired. For the LDR module (if youre having one camera outside), connect GPIO pin 18 to the D0. Connect VCC to VCC and GND to GND on the raspberry pi. Then, just connect your two webcams to the USB. You may have to flip them if you find that they are displaying in the wrong order. Again though, if this is not the configuration you desire feel free to modify the code. 
+
+<img src="./res/wiring.jpg" width="380" height="400"/>
 
 # Usage
 
